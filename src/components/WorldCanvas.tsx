@@ -42,12 +42,22 @@ function GroundClickPlane(): React.ReactElement {
   )
 }
 
+/** Pixel-ratio cap per quality setting. Low devices stay at 1; Auto caps
+ *  at 1.75 so high-DPI phones do not render at 3x. */
+const DPR_BY_QUALITY: Record<'Low' | 'Medium' | 'High' | 'Auto', [number, number]> = {
+  Low: [1, 1],
+  Medium: [1, 1.5],
+  High: [1, 2],
+  Auto: [1, 1.75],
+}
+
 export function WorldCanvas({ onCreated }: WorldCanvasProps): React.ReactElement {
   const closePanel = useAppStore((s) => s.closePanel)
+  const renderQuality = useAppStore((s) => s.renderQuality)
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
+      dpr={DPR_BY_QUALITY[renderQuality]}
       camera={{ position: [33, 28, -39], fov: 42, near: 0.5, far: 300 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
       onCreated={onCreated}

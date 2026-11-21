@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
-import { Building2, Bot, Check, Loader2, Lock, Mail, MonitorPlay } from 'lucide-react'
+import { Building2, Bot, Check, Loader2, Lock, Mail, MonitorPlay, User } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './supabaseClient'
 import { useAppStore } from '../state/useAppStore'
-import { WORLD_NAME } from '../data/worldData'
+import { AGENTS, OWNER, WORLD_NAME } from '../data/worldData'
 
 const EASE: [number, number, number, number] = [0.32, 0.72, 0, 1]
 
@@ -14,11 +14,11 @@ const BULLETS = [
   },
   {
     icon: Bot,
-    text: '13 agent dan pemilik yang bergerak mengikuti jadwal visual harian.',
+    text: `${AGENTS.length} agent dan pemilik yang bergerak mengikuti jadwal visual harian.`,
   },
   {
     icon: Check,
-    text: 'Mode demo tanpa backend. Tidak ada pekerjaan AI nyata di dalam simulasi ini.',
+    text: 'Tidak ada pekerjaan AI nyata di dalam simulasi ini.',
   },
 ]
 
@@ -28,6 +28,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showDemoGate, setShowDemoGate] = useState(false)
+  const [gateName, setGateName] = useState('')
+  const [gatePassword, setGatePassword] = useState('')
+  const [gateError, setGateError] = useState('')
 
   async function handleLiveLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -56,8 +60,17 @@ export default function LoginScreen() {
     }
   }
 
-  function handleDemo() {
-    setSession({ userName: 'Abi', mode: 'demo', email: null })
+  function handleDemoGateSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (
+      gateName.trim().toLowerCase() === OWNER.name.toLowerCase() &&
+      gatePassword === 'abi102009'
+    ) {
+      setGateError('')
+      setSession({ userName: OWNER.name, mode: 'demo', email: null })
+      return
+    }
+    setGateError('Nama atau password salah.')
   }
 
   return (
@@ -117,7 +130,7 @@ export default function LoginScreen() {
             <div className="rounded-[calc(2rem-0.375rem)] bg-white p-6 shadow-panel sm:p-7">
               <h2 className="text-xl font-bold">Masuk ke dunia 3D</h2>
               <p className="mt-1 text-sm text-inksoft">
-                Pilih mode demo, atau login live bila sudah dikonfigurasi.
+                Pilih mode demo atau login live.
               </p>
 
               <form onSubmit={handleLiveLogin} className="mt-6 space-y-4">
@@ -132,10 +145,11 @@ export default function LoginScreen() {
                       type="email"
                       required
                       autoComplete="email"
+                      disabled={!isSupabaseConfigured}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nama@email.com"
-                      className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-inksoft/70"
+                      placeholder="nama@gmail.com"
+                      className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-inksoft/70 disabled:cursor-not-allowed disabled:opacity-40"
                     />
                   </div>
                 </div>
@@ -150,10 +164,11 @@ export default function LoginScreen() {
                       type="password"
                       required
                       autoComplete="current-password"
+                      disabled={!isSupabaseConfigured}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Password akun live"
-                      className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-inksoft/70"
+                      placeholder="Password"
+                      className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-inksoft/70 disabled:cursor-not-allowed disabled:opacity-40"
                     />
                   </div>
                 </div>
@@ -172,12 +187,6 @@ export default function LoginScreen() {
                   {submitting ? <Loader2 size={17} className="animate-spin" /> : null}
                   Masuk (live)
                 </button>
-                {!isSupabaseConfigured ? (
-                  <p className="text-[13px] leading-relaxed text-inksoft">
-                    Login live belum dikonfigurasi. Atur VITE_SUPABASE_URL dan
-                    VITE_SUPABASE_ANON_KEY di .env, lihat .env.example.
-                  </p>
-                ) : null}
               </form>
 
               <div className="my-5 flex items-center gap-3 text-xs text-inksoft">
@@ -186,20 +195,76 @@ export default function LoginScreen() {
                 <span className="h-px flex-1 bg-line" />
               </div>
 
-              <span className="mb-3 inline-flex rounded-full bg-cream px-3 py-1 text-xs font-semibold text-inksoft">
-                Demo, bukan live. Tanpa backend dan tanpa data nyata.
-              </span>
               <button
                 type="button"
-                onClick={handleDemo}
+                onClick={() => {
+                  setShowDemoGate(true)
+                  setGateError('')
+                }}
                 className="w-full rounded-full border border-ink/20 bg-white px-4 py-2.5 text-sm font-semibold text-ink"
               >
                 Masuk Mode Demo
               </button>
-              <p className="mt-3 text-[13px] leading-relaxed text-inksoft">
-                Mode demo membuka dunia 3D lengkap untuk dilihat dan dijelajahi,
-                tanpa akun dan tanpa menyimpan data.
-              </p>
+
+              {showDemoGate ? (
+                <form onSubmit={handleDemoGateSubmit} className="mt-4 space-y-4">
+                  <div>
+                    <label htmlFor="demo-name" className="mb-1.5 block text-[13px] font-semibold">
+                      Nama
+                    </label>
+                    <div className="relative">
+                      <User size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-inksoft" />
+                      <input
+                        id="demo-name"
+                        type="text"
+                        required
+                        autoComplete="name"
+                        value={gateName}
+                        onChange={(e) => {
+                          setGateName(e.target.value)
+                          setGateError('')
+                        }}
+                        placeholder="Nama"
+                        className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-inksoft/70"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="demo-password" className="mb-1.5 block text-[13px] font-semibold">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-inksoft" />
+                      <input
+                        id="demo-password"
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        value={gatePassword}
+                        onChange={(e) => {
+                          setGatePassword(e.target.value)
+                          setGateError('')
+                        }}
+                        placeholder="Password"
+                        className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-inksoft/70"
+                      />
+                    </div>
+                  </div>
+
+                  {gateError ? (
+                    <p role="alert" className="rounded-xl bg-red-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-red-800">
+                      {gateError}
+                    </p>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-white"
+                  >
+                    Masuk
+                  </button>
+                </form>
+              ) : null}
             </div>
           </div>
         </motion.div>

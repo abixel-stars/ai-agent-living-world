@@ -59,8 +59,8 @@ export function Lighting(): React.ReactElement {
         intensity={1.6}
         color="#FFD9A8"
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-left={-45}
         shadow-camera-right={45}
         shadow-camera-top={45}

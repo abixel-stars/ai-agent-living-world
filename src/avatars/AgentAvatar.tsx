@@ -5,7 +5,7 @@ import { MathUtils, type Group } from 'three'
 import { simEngine, useSimSnapshot } from '../simulation/engine'
 import { useAppStore } from '../state/useAppStore'
 import { OWNER } from '../data/worldData'
-import { floorOfY } from '../world/layout'
+import { floorOfY, FLOOR_BASE_Y } from '../world/layout'
 import type { AgentDef, OwnerDef } from '../types'
 import { AvatarModel, type AvatarParts } from './AvatarModel'
 
@@ -101,7 +101,11 @@ export function AgentAvatar({ def, isOwner }: AgentAvatarProps) {
     if (!group) return
     const rt = simEngine.getRuntime(def.id)
     if (!rt) return
-    group.position.set(rt.pos[0], rt.pos[1], rt.pos[2])
+    // Grounded single-floor view: the shown floor renders at ground level,
+    // so characters standing on it render the same distance lower. The
+    // simulation keeps absolute heights; only the display position shifts.
+    const floorOffset = selectedFloor > 1 ? (FLOOR_BASE_Y[selectedFloor] ?? 0) : 0
+    group.position.set(rt.pos[0], rt.pos[1] - floorOffset, rt.pos[2])
     group.rotation.y = rt.heading
 
     const root = rootRef.current

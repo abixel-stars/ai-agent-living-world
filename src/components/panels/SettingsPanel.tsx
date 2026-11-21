@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { LogOut } from 'lucide-react'
 import { WORLD_NAME } from '../../data/worldData'
 import { useAppStore } from '../../state/useAppStore'
@@ -10,7 +9,8 @@ const QUALITIES: Quality[] = ['Low', 'Medium', 'High', 'Auto']
 export default function SettingsPanel() {
   const session = useAppStore((s) => s.session)
   const setSession = useAppStore((s) => s.setSession)
-  const [quality, setQuality] = useState<Quality>('Auto')
+  const quality = useAppStore((s) => s.renderQuality)
+  const setRenderQuality = useAppStore((s) => s.setRenderQuality)
 
   return (
     <div className="space-y-6">
@@ -26,7 +26,7 @@ export default function SettingsPanel() {
         <select
           id="render-quality"
           value={quality}
-          onChange={(e) => setQuality(e.target.value as Quality)}
+          onChange={(e) => setRenderQuality(e.target.value as Quality)}
           className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm"
         >
           {QUALITIES.map((q) => (
@@ -36,7 +36,8 @@ export default function SettingsPanel() {
           ))}
         </select>
         <p className="mt-2 text-[13px] leading-relaxed text-inksoft">
-          Kualitas rendering, tersimpan lokal di sesi ini.
+          Kualitas rendering membatasi ketajaman gambar (pixel ratio) agar
+          dunia tetap lancar di perangkat rendah.
         </p>
       </section>
 

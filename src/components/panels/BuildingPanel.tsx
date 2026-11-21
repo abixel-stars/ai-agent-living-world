@@ -3,7 +3,7 @@ import { WORLD_NAME } from '../../data/worldData'
 import { useAppStore } from '../../state/useAppStore'
 import { ROOM_PLANS } from '../../world/layout'
 
-const FLOORS = [1, 2, 3, 4, 5]
+const FLOORS = [1, 2, 3]
 
 const GROUND_ROOMS = [
   { name: 'Lobi', detail: 'Lantai 1' },
@@ -16,7 +16,7 @@ const GROUND_ROOMS = [
 
 const ROOMS = [
   ...GROUND_ROOMS,
-  ...[2, 3, 4, 5].flatMap((floor) =>
+  ...[2, 3].flatMap((floor) =>
     ROOM_PLANS[floor].map((room) => ({ name: room.name, detail: `Lantai ${floor}` })),
   ),
 ]
@@ -24,15 +24,26 @@ const ROOMS = [
 export default function BuildingPanel() {
   const floor = useAppStore((s) => s.floor)
   const setFloor = useAppStore((s) => s.setFloor)
+  const cameraMode = useAppStore((s) => s.cameraMode)
+  const setCameraMode = useAppStore((s) => s.setCameraMode)
   const roofHidden = useAppStore((s) => s.roofHidden)
   const toggleRoof = useAppStore((s) => s.toggleRoof)
+
+  function handleFloor(next: number) {
+    setFloor(next)
+    // Reframe without touching the camera rig: a single floor is shown
+    // grounded, so the focus framing (no floor-height offset) keeps it in
+    // view; returning to the whole building restores the orbit framing.
+    if (next > 1 && cameraMode === 'orbit') setCameraMode('focus')
+    if (next === 1 && cameraMode === 'focus') setCameraMode('orbit')
+  }
 
   return (
     <div className="space-y-6">
       <section>
         <h2 className="text-lg font-bold leading-tight">Gedung Kantor Pusat</h2>
         <p className="mt-1 text-sm leading-relaxed text-inksoft">
-          Gedung utama {WORLD_NAME}, 5 lantai.
+          Gedung utama {WORLD_NAME}, 3 lantai.
         </p>
       </section>
 
@@ -46,7 +57,7 @@ export default function BuildingPanel() {
               key={n}
               type="button"
               aria-pressed={floor === n}
-              onClick={() => setFloor(n)}
+              onClick={() => handleFloor(n)}
               className={`h-10 w-10 rounded-full text-sm font-semibold tabular-nums ${
                 floor === n ? 'bg-ink text-white' : 'border border-line bg-white text-ink'
               }`}
@@ -57,8 +68,8 @@ export default function BuildingPanel() {
         </div>
         <p className="mt-3 text-sm leading-relaxed">
           {floor === 1
-            ? 'Lantai 1: lobi, ruang CEO, workspace, ruang meeting (detail)'
-            : `Lantai ${floor}: ${ROOM_PLANS[floor].map((room) => room.name).join(', ')}`}
+            ? 'Gedung utuh: lobi, ruang CEO, workspace, ruang meeting, dan interior lantai 2 dan 3 terlihat dari luar.'
+            : `Lantai ${floor}: ${ROOM_PLANS[floor].map((room) => room.name).join(', ')}. Lantai ditampilkan di permukaan tanah, tanpa atap di atasnya.`}
         </p>
       </section>
 

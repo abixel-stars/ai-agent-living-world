@@ -15,9 +15,12 @@ interface AppState {
   panelOpen: boolean
   panelWidth: number
   cameraMode: CameraMode
-  /** Floor shown in detail: 1 is the detailed ground floor, 2-5 are shells. */
+  /** Floor view: 1 shows the whole 3-floor building; 2-3 show one floor
+   *  grounded at ground level, other floors and the roof hidden. */
   floor: number
   roofHidden: boolean
+  /** Rendering quality preference, applied as a pixel-ratio cap. */
+  renderQuality: 'Low' | 'Medium' | 'High' | 'Auto'
   playing: boolean
   speed: 1 | 2 | 4
   followId: string | null
@@ -34,6 +37,7 @@ interface AppState {
   setPanelWidth: (w: number) => void
   setCameraMode: (m: CameraMode) => void
   setFloor: (f: number) => void
+  setRenderQuality: (q: 'Low' | 'Medium' | 'High' | 'Auto') => void
   toggleRoof: () => void
   togglePlaying: () => void
   setSpeed: (s: 1 | 2 | 4) => void
@@ -52,6 +56,7 @@ export const useAppStore = create<AppState>((set) => ({
   cameraMode: 'orbit',
   floor: 1,
   roofHidden: false,
+  renderQuality: 'Auto',
   playing: true,
   speed: 1,
   followId: null,
@@ -65,7 +70,8 @@ export const useAppStore = create<AppState>((set) => ({
   closePanel: () => set({ selection: null, panelOpen: false }),
   setPanelWidth: (panelWidth) => set({ panelWidth: Math.min(480, Math.max(300, panelWidth)) }),
   setCameraMode: (cameraMode) => set({ cameraMode }),
-  setFloor: (floor) => set({ floor }),
+  setFloor: (floor) => set({ floor: Math.min(3, Math.max(1, floor)) }),
+  setRenderQuality: (renderQuality) => set({ renderQuality }),
   toggleRoof: () => set((s) => ({ roofHidden: !s.roofHidden })),
   togglePlaying: () => set((s) => ({ playing: !s.playing })),
   setSpeed: (speed) => set({ speed }),

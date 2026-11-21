@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-import { Html } from '@react-three/drei'
 import type { ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { BUILDING, ROOF_Y } from './layout'
 import { getMaterial, materialFor, unitBox, unitCone, unitCylinder, unitSphere } from './materials'
 import { useAppStore } from '../state/useAppStore'
-import { WORLD_NAME } from '../data/worldData'
+import { NameBoard } from './NameBoard'
 
 type Vec3 = [number, number, number]
 
@@ -45,20 +44,23 @@ function UpperFloor({
   index,
   visible,
   hideCeiling,
+  grounded,
 }: {
   index: number
   visible: boolean
   hideCeiling: boolean
+  /** Single-floor view: the shell is translated down to ground level. */
+  grounded: boolean
 }): React.ReactElement | null {
   const baseY = GROUND_TOP + (index - 2) * FLOOR_HEIGHT
   if (!visible) return null
   return (
-    <group>
+    <group position={[0, grounded ? -baseY : 0, 0]}>
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, baseY + 0.18, 0]} scale={[WIDTH + 0.6, 0.36, DEPTH + 0.6]} castShadow />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[0, baseY + FLOOR_HEIGHT / 2, -10]} scale={[WIDTH, FLOOR_HEIGHT, 0.08]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[0, baseY + FLOOR_HEIGHT / 2, 10]} scale={[WIDTH, FLOOR_HEIGHT, 0.08]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[-15, baseY + FLOOR_HEIGHT / 2, 0]} scale={[0.08, FLOOR_HEIGHT, DEPTH]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[15, baseY + FLOOR_HEIGHT / 2, 0]} scale={[0.08, FLOOR_HEIGHT, DEPTH]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[0, baseY + FLOOR_HEIGHT / 2, -10]} scale={[WIDTH, FLOOR_HEIGHT, 0.08]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[0, baseY + FLOOR_HEIGHT / 2, 10]} scale={[WIDTH, FLOOR_HEIGHT, 0.08]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[-15, baseY + FLOOR_HEIGHT / 2, 0]} scale={[0.08, FLOOR_HEIGHT, DEPTH]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[15, baseY + FLOOR_HEIGHT / 2, 0]} scale={[0.08, FLOOR_HEIGHT, DEPTH]} />
       {!hideCeiling && (
         <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, baseY + FLOOR_HEIGHT - 0.18, 0]} scale={[WIDTH + 0.6, 0.36, DEPTH + 0.6]} />
       )}
@@ -74,21 +76,21 @@ function GroundShell(): React.ReactElement {
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[14.65, 2, -9.65]} scale={[0.7, 4, 0.7]} castShadow />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[-14.65, 2, 9.65]} scale={[0.7, 4, 0.7]} castShadow />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[14.65, 2, 9.65]} scale={[0.7, 4, 0.7]} castShadow />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[0, 2, 9.85]} scale={[29, 3.2, 0.08]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[0, 2.02, 9.85]} scale={[29, 3.24, 0.08]} />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, 0.2, 9.7]} scale={[WIDTH, 0.4, 0.6]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[-15, 2, 0]} scale={[0.08, 3.2, 19]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[15, 2, 0]} scale={[0.08, 3.2, 19]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[-15, 2.02, 0]} scale={[0.08, 3.24, 19]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[15, 2.02, 0]} scale={[0.08, 3.24, 19]} />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[-14.7, 0.2, 0]} scale={[0.6, 0.4, DEPTH]} />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[14.7, 0.2, 0]} scale={[0.6, 0.4, DEPTH]} />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[-13, 2, -9.7]} scale={[4, 4, 0.6]} castShadow />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[3, 0.2, -9.7]} scale={[24, 0.4, 0.6]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[3, 2, -9.85]} scale={[24, 3.2, 0.08]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[3, 2.02, -9.85]} scale={[24, 3.24, 0.08]} />
       {[-6, -3, 0, 3, 6, 9, 12].map((x) => (
-        <mesh key={x} geometry={unitBox} material={getMaterial('creamWall')} position={[x, 2, -9.85]} scale={[0.12, 3.2, 0.12]} />
+        <mesh key={x} geometry={unitBox} material={getMaterial('creamWall')} position={[x, 2.02, -9.85]} scale={[0.12, 3.24, 0.12]} />
       ))}
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[-10, 3.3, -9.7]} scale={[2.6, 1.4, 0.6]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[-10.55, 1.3, -9.85]} scale={[0.9, 2.6, 0.08]} />
-      <mesh geometry={unitBox} material={getMaterial('glass')} position={[-9.45, 1.3, -9.85]} scale={[0.9, 2.6, 0.08]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[-10.55, 1.3, -9.85]} scale={[0.9, 2.6, 0.08]} />
+      <mesh geometry={unitBox} material={getMaterial('glassExterior')} position={[-9.45, 1.3, -9.85]} scale={[0.9, 2.6, 0.08]} />
       <mesh geometry={unitBox} material={getMaterial('darkMetal')} position={[-10, 1.3, -9.85]} scale={[0.08, 2.6, 0.1]} />
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, 3.82, 0]} scale={[WIDTH + 0.6, 0.36, DEPTH + 0.6]} castShadow />
       <mesh geometry={unitBox} material={getMaterial('wood')} position={[-10, 3.1, -11.25]} scale={[5, 0.18, 2.6]} castShadow />
@@ -131,10 +133,11 @@ export function HQBuilding(): React.ReactElement {
 
   const showGroundShell = floor === 1
   const showRoof = floor === 1 && !roofHidden
-  const showUpper = (index: number): boolean => {
-    if (floor === 1) return !roofHidden
-    return floor === index
-  }
+  // Whole-building view (floor 1) shows every shell with its ceiling. A
+  // single-floor view shows only that shell, translated to ground level
+  // with no ceiling, so the floor never appears floating and no roof or
+  // ceiling slab covers its interior.
+  const showUpper = (index: number): boolean => floor === 1 || floor === index
 
   const handleClick = (e: ThreeEvent<MouseEvent>): void => {
     e.stopPropagation()
@@ -144,36 +147,21 @@ export function HQBuilding(): React.ReactElement {
   return (
     <group onClick={handleClick}>
       {showGroundShell && <GroundShell />}
-      {[2, 3, 4, 5].map((index) => (
-        <UpperFloor key={index} index={index} visible={showUpper(index)} hideCeiling={floor === index && roofHidden} />
+      {[2, 3].map((index) => (
+        <UpperFloor
+          key={index}
+          index={index}
+          visible={showUpper(index)}
+          hideCeiling={floor === index}
+          grounded={floor === index}
+        />
       ))}
       {showRoof && (
         <group>
-          <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, ROOF_Y - 0.2, 0]} scale={[WIDTH + 0.6, 0.4, DEPTH + 0.6]} castShadow />
           <Rooftop />
         </group>
       )}
-      {showGroundShell && (
-        <Html position={[-10, 4.6, -11.55]} center distanceFactor={52} zIndexRange={[10, 0]}>
-          <div
-            style={{
-              background: '#7C5732',
-              border: '1px solid #5E3F22',
-              borderRadius: 6,
-              padding: '5px 12px',
-              fontFamily: '"Plus Jakarta Sans", sans-serif',
-              fontSize: 13,
-              fontWeight: 700,
-              color: '#FAF7F1',
-              letterSpacing: 0.4,
-              whiteSpace: 'nowrap',
-              boxShadow: '0 6px 20px rgba(46,42,37,0.18)',
-            }}
-          >
-            {WORLD_NAME}
-          </div>
-        </Html>
-      )}
+      {showGroundShell && <NameBoard />}
     </group>
   )
 }

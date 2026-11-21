@@ -1,6 +1,6 @@
 import { getMaterial, materialFor, unitBox, unitCylinder, unitSphere } from './materials'
-import { CEO_CHAIR, CEO_DESK, DESKS, MEETING_CHAIRS, MEETING_TABLE, RECEPTION_DESK, deskChair } from './layout'
-import type { DeskSpot } from './layout'
+import { CEO_CHAIR, CEO_DESK, DESKS, MEETING_CHAIRS, MEETING_TABLE, RECEPTION_DESK } from './layout'
+import { DeskSet } from './furniture'
 import { useAppStore } from '../state/useAppStore'
 
 type Vec3 = [number, number, number]
@@ -43,25 +43,6 @@ function GlassPartition({ position, size, rotationY }: { position: Vec3; size: V
       <mesh geometry={unitBox} material={getMaterial('wood')} position={[0, 2.82, 0]} scale={[size[0], 0.12, 0.12]} />
       <mesh geometry={unitBox} material={getMaterial('wood')} position={[-size[0] / 2, 1.45, 0]} scale={[0.1, 2.9, 0.12]} />
       <mesh geometry={unitBox} material={getMaterial('wood')} position={[size[0] / 2, 1.45, 0]} scale={[0.1, 2.9, 0.12]} />
-    </group>
-  )
-}
-
-function Desk({ desk }: { desk: DeskSpot }): React.ReactElement {
-  const chair = deskChair(desk)
-  const { x, z } = desk
-  return (
-    <group>
-      <mesh geometry={unitBox} material={getMaterial('wood')} position={[x, 0.76, z]} scale={[1.8, 0.08, 1.0]} castShadow receiveShadow />
-      <mesh geometry={unitBox} material={getMaterial('wooddeep')} position={[x - 0.82, 0.38, z]} scale={[0.08, 0.76, 0.9]} />
-      <mesh geometry={unitBox} material={getMaterial('wooddeep')} position={[x + 0.82, 0.38, z]} scale={[0.08, 0.76, 0.9]} />
-      <mesh geometry={unitBox} material={getMaterial('darkMetal')} position={[x, 1.02, z - 0.32]} scale={[0.7, 0.45, 0.05]} castShadow />
-      <mesh geometry={unitBox} material={getMaterial('emissiveScreen')} position={[x, 1.02, z - 0.28]} scale={[0.62, 0.37, 0.02]} />
-      <mesh geometry={unitBox} material={getMaterial('darkMetal')} position={[x, 0.82, z - 0.32]} scale={[0.08, 0.06, 0.2]} />
-      <mesh geometry={unitBox} material={getMaterial('white')} position={[x, 0.82, z + 0.1]} scale={[0.5, 0.03, 0.18]} />
-      <mesh geometry={unitBox} material={getMaterial('darkMetal')} position={[x + 0.6, 0.92, z + 0.25]} scale={[0.06, 0.22, 0.14]} />
-      <mesh geometry={unitSphere} material={materialFor('#FFE8B0')} position={[x + 0.6, 1.04, z + 0.25]} scale={[0.08, 0.08, 0.08]} />
-      <Chair position={[chair.x, 0, chair.z]} heading={chair.heading} />
     </group>
   )
 }
@@ -114,11 +95,7 @@ export function InteriorFloor(): React.ReactElement | null {
         <GlassPartition position={[-5.6, 0, 3.7]} size={[1.4, 1, 1]} rotationY={Math.PI / 2} />
       </group>
 
-      <group>
-        {DESKS.filter((desk) => desk.floor === 1).map((desk) => (
-          <Desk key={desk.id} desk={desk} />
-        ))}
-      </group>
+      <DeskSet desks={DESKS.filter((desk) => desk.floor === 1).map((desk) => ({ x: desk.x, z: desk.z }))} />
 
       <group>
         <mesh geometry={unitBox} material={getMaterial('wood')} position={[MEETING_TABLE.x, 0.76, MEETING_TABLE.z]} scale={[MEETING_TABLE.w, 0.08, MEETING_TABLE.d]} castShadow receiveShadow />

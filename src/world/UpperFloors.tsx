@@ -1,4 +1,4 @@
-import { getMaterial, materialFor, unitBox, unitCylinder, unitSphere } from './materials'
+import { getMaterial, materialFor, unitBox, unitSphere } from './materials'
 import {
   DESKS,
   FLOOR_BASE_Y,
@@ -11,7 +11,7 @@ import {
   CabinetUnit,
   CoffeeTableUnit,
   ConsoleUnit,
-  DeskUnit,
+  DeskSet,
   DrawingBoardUnit,
   FocusPodUnit,
   GlassPartitionUnit,
@@ -80,8 +80,8 @@ function ToiletCore(): React.ReactElement {
     <group>
       <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[-12.4, 1.5, -7.4]} scale={[3.8, 3.0, 3.8]} castShadow />
       <mesh geometry={unitBox} material={getMaterial('wood')} position={[-12.4, 0.1, -7.4]} scale={[3.9, 0.2, 3.9]} />
-      <mesh geometry={unitBox} material={getMaterial('wood')} position={[-10.44, 1.05, -7.4]} scale={[0.08, 2.1, 0.9]} />
-      <mesh geometry={unitBox} material={materialFor('#8FB4D4')} position={[-10.44, 2.5, -7.4]} scale={[0.06, 0.3, 0.7]} />
+      <mesh geometry={unitBox} material={getMaterial('wood')} position={[-10.46, 1.05, -7.4]} scale={[0.08, 2.1, 0.9]} />
+      <mesh geometry={unitBox} material={materialFor('#8FB4D4')} position={[-10.46, 2.5, -7.4]} scale={[0.06, 0.3, 0.7]} />
       <mesh geometry={unitSphere} material={getMaterial('darkMetal')} position={[-10.38, 1.05, -7.05]} scale={[0.05, 0.05, 0.05]} />
     </group>
   )
@@ -316,42 +316,13 @@ function RoomKit({ room }: { room: RoomPlan }): React.ReactElement {
   }
 }
 
-/** Exterior balcony deck on the south side of floor 5, outside the glass. */
-function BalconyDeck(): React.ReactElement {
-  const posts: React.ReactElement[] = []
-  for (let x = -1.5; x <= 14; x += 2.2) {
-    posts.push(
-      <mesh key={x} geometry={unitCylinder} material={getMaterial('darkMetal')} position={[x, 0.5, 11.9]} scale={[0.04, 1.0, 0.04]} />,
-    )
-  }
-  return (
-    <group>
-      <mesh geometry={unitBox} material={getMaterial('wood')} position={[6.15, -0.02, 11]} scale={[16.3, 0.16, 2.0]} castShadow />
-      <mesh geometry={unitBox} material={getMaterial('darkMetal')} position={[6.15, 1.0, 11.9]} scale={[16.3, 0.08, 0.08]} />
-      <mesh geometry={unitBox} material={getMaterial('darkMetal')} position={[6.15, 0.55, 11.9]} scale={[16.3, 0.05, 0.05]} />
-      {posts}
-      {[0, 6.15, 12.3].map((x) => (
-        <mesh
-          key={x}
-          geometry={unitBox}
-          material={getMaterial('darkMetal')}
-          position={[x, -0.55, 10.9]}
-          scale={[0.08, 0.08, 1.6]}
-          rotation={[0.72, 0, 0]}
-        />
-      ))}
-      <PlanterUnit position={[0, 0, 11]} />
-      <PlanterUnit position={[12.3, 0, 11]} />
-    </group>
-  )
-}
-
-/** Detailed interior of one upper floor. Rendered only when that floor is
- *  selected, matching the ground floor's isolation behavior. */
-export function UpperFloors(): React.ReactElement | null {
-  const floor = useAppStore((s) => s.floor)
-  if (floor < 2 || floor > 5) return null
-  const baseY = FLOOR_BASE_Y[floor]
+/** Detailed interior of one upper floor. In the whole-building view
+ *  (floor 1) every upper floor renders at its own height, furnished and
+ *  visible through the shell glass. In a single-floor view only the
+ *  selected floor renders, translated to ground level, so it never
+ *  appears floating. */
+function FloorInterior({ floor, grounded }: { floor: number; grounded: boolean }): React.ReactElement {
+  const baseY = grounded ? 0 : FLOOR_BASE_Y[floor]
   const rooms = ROOM_PLANS[floor]
   return (
     <group position={[0, baseY, 0]}>
@@ -378,11 +349,21 @@ export function UpperFloors(): React.ReactElement | null {
       {rooms.map((r) => (
         <RoomKit key={r.id} room={r} />
       ))}
-      {DESKS.filter((d) => d.floor === floor).map((d) => (
-        <DeskUnit key={d.id} x={d.x} z={d.z} />
-      ))}
-
-      {floor === 5 && <BalconyDeck />}
+      <DeskSet desks={DESKS.filter((d) => d.floor === floor).map((d) => ({ x: d.x, z: d.z }))} />
     </group>
   )
+}
+
+export function UpperFloors(): React.ReactElement | null {
+  const floor = useAppStore((s) => s.floor)
+  if (floor < 1 || floor > 3) return null
+  if (floor === 1) {
+    return (
+      <group>
+        <FloorInterior floor={2} grounded={false} />
+        <FloorInterior floor={3} grounded={false} />
+      </group>
+    )
+  }
+  return <FloorInterior floor={floor} grounded />
 }

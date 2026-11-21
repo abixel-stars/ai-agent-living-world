@@ -26,6 +26,7 @@ export type MaterialName =
   | 'wooddeep'
   | 'creamWall'
   | 'glass'
+  | 'glassExterior'
   | 'grass'
   | 'stone'
   | 'asphalt'
@@ -56,6 +57,17 @@ function buildMaterial(name: MaterialName): THREE.MeshStandardMaterial {
         metalness: 0.1,
         transparent: true,
         opacity: 0.38,
+        depthWrite: false,
+      })
+    case 'glassExterior':
+      // Building shell glazing: kept much clearer than interior partitions
+      // so furnished interiors read from a normal exterior orbit distance.
+      return new THREE.MeshStandardMaterial({
+        color: PALETTE.skysoft,
+        roughness: 0.1,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.22,
         depthWrite: false,
       })
     case 'grass':

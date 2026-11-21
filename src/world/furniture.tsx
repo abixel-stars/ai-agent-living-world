@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+import * as THREE from 'three'
 import { getMaterial, materialFor, unitBox, unitCylinder, unitSphere } from './materials'
 
 /** Shared furniture pieces for the upper-floor interiors. Same procedural
@@ -221,18 +223,17 @@ export function MeetingTableUnit({
   for (let i = 0; i < per; i += 1) {
     chairXs.push(-w / 2 + (i + 0.5) * (w / per))
   }
+  const chairSpots: Placement[] = [
+    ...chairXs.map((cx) => ({ x: cx, z: -d / 2 - 0.65, heading: 0 })),
+    ...chairXs.map((cx) => ({ x: cx, z: d / 2 + 0.65, heading: Math.PI })),
+  ]
   return (
     <group position={position}>
       <mesh geometry={unitBox} material={getMaterial('wood')} position={[0, 0.74, 0]} scale={[w, 0.08, d]} castShadow receiveShadow />
       <mesh geometry={unitBox} material={getMaterial('wooddeep')} position={[-w / 2 + 0.15, 0.37, 0]} scale={[0.1, 0.74, d - 0.3]} />
       <mesh geometry={unitBox} material={getMaterial('wooddeep')} position={[w / 2 - 0.15, 0.37, 0]} scale={[0.1, 0.74, d - 0.3]} />
       <mesh geometry={unitBox} material={getMaterial('emissiveScreen')} position={[0, 0.8, 0]} scale={[0.5, 0.03, 0.32]} />
-      {chairXs.map((cx, i) => (
-        <ChairUnit key={`n${i}`} position={[cx, 0, -d / 2 - 0.65]} heading={0} />
-      ))}
-      {chairXs.map((cx, i) => (
-        <ChairUnit key={`s${i}`} position={[cx, 0, d / 2 + 0.65]} heading={Math.PI} />
-      ))}
+      <ChairSet spots={chairSpots} />
     </group>
   )
 }
@@ -422,5 +423,100 @@ export function RugUnit({
       scale={[w, 0.03, d]}
       receiveShadow
     />
+  )
+}
+
+interface PartDef {
+  geometry: THREE.BufferGeometry
+  material: THREE.Material
+  offset: Vec3
+  scale: Vec3
+  castShadow?: boolean
+}
+
+interface Placement {
+  x: number
+  z: number
+  heading: number
+}
+
+/** One InstancedMesh per part definition, placed at every placement.
+ *  Built once in useMemo: no per-frame allocation, shared unit geometries
+ *  and cached materials. Frustum culling is off because one mesh spans
+ *  every placement on the floor. */
+function instancedParts(parts: PartDef[], placements: Placement[]): THREE.InstancedMesh[] {
+  const t1 = new THREE.Matrix4()
+  const rot = new THREE.Matrix4()
+  const t2 = new THREE.Matrix4()
+  const scl = new THREE.Matrix4()
+  const mat = new THREE.Matrix4()
+  return parts.map((part) => {
+    const mesh = new THREE.InstancedMesh(part.geometry, part.material, placements.length)
+    placements.forEach((pl, i) => {
+      t1.makeTranslation(pl.x, 0, pl.z)
+      rot.makeRotationY(pl.heading)
+      t2.makeTranslation(part.offset[0], part.offset[1], part.offset[2])
+      scl.makeScale(part.scale[0], part.scale[1], part.scale[2])
+      mat.copy(t1).multiply(rot).multiply(t2).multiply(scl)
+      mesh.setMatrixAt(i, mat)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    mesh.castShadow = part.castShadow ?? false
+    mesh.frustumCulled = false
+    return mesh
+  })
+}
+
+const CHAIR_PARTS: PartDef[] = [
+  { geometry: unitBox, material: getMaterial('darkMetal'), offset: [0, 0.28, 0], scale: [0.1, 0.28, 0.1] },
+  { geometry: unitBox, material: getMaterial('darkMetal'), offset: [0, 0.46, 0], scale: [0.5, 0.07, 0.48], castShadow: true },
+  { geometry: unitBox, material: getMaterial('darkMetal'), offset: [0, 0.78, 0.24], scale: [0.5, 0.55, 0.07], castShadow: true },
+  { geometry: unitCylinder, material: getMaterial('darkMetal'), offset: [0, 0.06, 0], scale: [0.26, 0.05, 0.26] },
+]
+
+/** Every chair in one spot list as instanced meshes. Same look as ChairUnit. */
+export function ChairSet({ spots }: { spots: Placement[] }): React.ReactElement | null {
+  const meshes = useMemo(() => instancedParts(CHAIR_PARTS, spots), [spots])
+  if (spots.length === 0) return null
+  return (
+    <group>
+      {meshes.map((mesh, i) => (
+        <primitive key={i} object={mesh} />
+      ))}
+    </group>
+  )
+}
+
+const DESK_PARTS: PartDef[] = [
+  { geometry: unitBox, material: getMaterial('wood'), offset: [0, 0.76, 0], scale: [1.8, 0.08, 1.0], castShadow: true },
+  { geometry: unitBox, material: getMaterial('wooddeep'), offset: [-0.82, 0.38, 0], scale: [0.08, 0.76, 0.9] },
+  { geometry: unitBox, material: getMaterial('wooddeep'), offset: [0.82, 0.38, 0], scale: [0.08, 0.76, 0.9] },
+  { geometry: unitBox, material: getMaterial('darkMetal'), offset: [0, 1.02, -0.32], scale: [0.7, 0.45, 0.05], castShadow: true },
+  { geometry: unitBox, material: getMaterial('emissiveScreen'), offset: [0, 1.02, -0.28], scale: [0.62, 0.37, 0.02] },
+  { geometry: unitBox, material: getMaterial('darkMetal'), offset: [0, 0.82, -0.32], scale: [0.08, 0.06, 0.2] },
+  { geometry: unitBox, material: getMaterial('white'), offset: [0, 0.82, 0.1], scale: [0.5, 0.03, 0.18] },
+  { geometry: unitBox, material: getMaterial('darkMetal'), offset: [0.6, 0.92, 0.25], scale: [0.06, 0.22, 0.14] },
+  { geometry: unitSphere, material: materialFor('#FFE8B0'), offset: [0.6, 1.04, 0.25], scale: [0.08, 0.08, 0.08] },
+]
+
+/** Agent work desks with monitors, keyboards and chairs, instanced.
+ *  Same look as DeskUnit. Chairs sit on the south side, facing the desk. */
+export function DeskSet({ desks }: { desks: Array<{ x: number; z: number }> }): React.ReactElement | null {
+  const meshes = useMemo(
+    () => instancedParts(DESK_PARTS, desks.map((d) => ({ x: d.x, z: d.z, heading: 0 }))),
+    [desks],
+  )
+  const chairSpots = useMemo(
+    () => desks.map((d) => ({ x: d.x, z: d.z + 1.35, heading: Math.PI })),
+    [desks],
+  )
+  if (desks.length === 0) return null
+  return (
+    <group>
+      {meshes.map((mesh, i) => (
+        <primitive key={i} object={mesh} />
+      ))}
+      <ChairSet spots={chairSpots} />
+    </group>
   )
 }

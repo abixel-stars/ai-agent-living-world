@@ -3,7 +3,6 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useAppStore } from '../state/useAppStore'
-import { FLOOR_BASE_Y } from '../world/layout'
 import { useSimSnapshot } from '../simulation/engine'
 import type { Vec3Tuple } from '../types'
 
@@ -22,10 +21,19 @@ const TOP_TARGET = new THREE.Vector3(0, 0, -6)
 const FOCUS_POSITION = new THREE.Vector3(0, 14, -32)
 const FOCUS_TARGET = new THREE.Vector3(0, 6, 0)
 
+/** Free orbit limits. The polar range runs from directly overhead down to
+ *  just past horizontal, so low angles are possible; the per-frame ground
+ *  clamp below keeps the camera from sinking under the site instead of a
+ *  polar cap trapping the view. The target clamp keeps panning from
+ *  losing the site. */
+const MIN_POLAR_ANGLE = 0
+const MAX_POLAR_ANGLE = 1.64
+const MIN_CAMERA_Y = 0.7
+const TARGET_BOUNDS = { minX: -40, maxX: 40, minY: 0, maxY: 20, minZ: -30, maxZ: 30 }
+
 export function CameraRig(): React.ReactElement {
   const cameraMode = useAppStore((s) => s.cameraMode)
   const followId = useAppStore((s) => s.followId)
-  const selection = useAppStore((s) => s.selection)
   const floor = useAppStore((s) => s.floor)
   const camera = useThree((s) => s.camera)
   const controlsRef = useRef<ControlsRef>(null)
@@ -38,7 +46,6 @@ export function CameraRig(): React.ReactElement {
   const smoothFollowRef = useRef<THREE.Vector3 | null>(null)
   const prevSmoothRef = useRef(new THREE.Vector3())
   const tmpRef = useRef(new THREE.Vector3())
-  const prevFloorRef = useRef(floor)
 
   const snapshots = useSimSnapshot()
   const followed = followId ? snapshots.find((s) => s.id === followId) : undefined
@@ -47,13 +54,15 @@ export function CameraRig(): React.ReactElement {
     : null
 
   useEffect(() => {
-    const floorChanged = prevFloorRef.current !== floor
-    prevFloorRef.current = floor
     if (cameraMode === 'follow') {
       animRef.current.active = false
       return
     }
-    if (cameraMode === 'orbit' && !floorChanged) return
+    // Staying in orbit while the floor changes needs no reframe: the user
+    // keeps their own angle, and single floors are grounded at y = 0, so
+    // the orbit framing fits every floor view as-is. Floor changes that
+    // need a reframe switch mode (orbit to focus and back) in the panels.
+    if (cameraMode === 'orbit') return
     const anim = animRef.current
     if (cameraMode === 'top') {
       anim.position.copy(TOP_POSITION)
@@ -64,19 +73,13 @@ export function CameraRig(): React.ReactElement {
     } else {
       anim.position.copy(DEFAULT_POSITION)
       anim.target.copy(DEFAULT_TARGET)
-      if (floor > 1) {
-        const baseY = FLOOR_BASE_Y[floor] ?? 0
-        anim.position.y += baseY
-        anim.target.y = baseY + 1
-      }
     }
     anim.active = true
-  }, [cameraMode, floor, selection])
+  }, [cameraMode, floor])
 
   useFrame((_, delta) => {
     const controls = controlsRef.current
     if (!controls) return
-    const step = 1 - Math.exp(-delta * 3.5)
     if (cameraMode === 'follow') {
       const target = followTargetRef.current
       if (target) {
@@ -94,22 +97,32 @@ export function CameraRig(): React.ReactElement {
         camera.position.z += smoothFollowRef.current.z - prevSmoothRef.current.z
         prevSmoothRef.current.copy(smoothFollowRef.current)
         controls.target.copy(smoothFollowRef.current)
-        controls.update()
       }
+      // Damping only settles when update() runs every frame; skipping it
+      // here is what made free orbit feel stiff.
+      controls.update()
       return
     }
     smoothFollowRef.current = null
     const anim = animRef.current
-    if (!anim.active) return
-    camera.position.lerp(anim.position, step)
-    controls.target.lerp(anim.target, step)
-    controls.update()
-    if (
-      camera.position.distanceTo(anim.position) < 0.08 &&
-      controls.target.distanceTo(anim.target) < 0.08
-    ) {
-      anim.active = false
+    if (anim.active) {
+      const step = 1 - Math.exp(-delta * 3.2)
+      camera.position.lerp(anim.position, step)
+      controls.target.lerp(anim.target, step)
+      if (
+        camera.position.distanceTo(anim.position) < 0.08 &&
+        controls.target.distanceTo(anim.target) < 0.08
+      ) {
+        anim.active = false
+      }
     }
+    controls.update()
+    // Sane bounds only: keep the camera above the ground and the pan
+    // target on the site, without capping the orbit angle itself.
+    controls.target.x = THREE.MathUtils.clamp(controls.target.x, TARGET_BOUNDS.minX, TARGET_BOUNDS.maxX)
+    controls.target.y = THREE.MathUtils.clamp(controls.target.y, TARGET_BOUNDS.minY, TARGET_BOUNDS.maxY)
+    controls.target.z = THREE.MathUtils.clamp(controls.target.z, TARGET_BOUNDS.minZ, TARGET_BOUNDS.maxZ)
+    if (camera.position.y < MIN_CAMERA_Y) camera.position.y = MIN_CAMERA_Y
   })
 
   return (
@@ -117,10 +130,23 @@ export function CameraRig(): React.ReactElement {
       ref={controlsRef}
       makeDefault
       enableDamping
-      dampingFactor={0.08}
+      dampingFactor={0.06}
+      enableRotate
+      enablePan
+      enableZoom
+      rotateSpeed={0.9}
+      panSpeed={0.9}
+      zoomSpeed={0.9}
+      screenSpacePanning={false}
       minDistance={8}
       maxDistance={75}
-      maxPolarAngle={1.45}
+      minPolarAngle={MIN_POLAR_ANGLE}
+      maxPolarAngle={MAX_POLAR_ANGLE}
+      onStart={() => {
+        // The user's own drag wins over a mode-transition glide: no fight,
+        // no snap back once they take over.
+        animRef.current.active = false
+      }}
     />
   )
 }
