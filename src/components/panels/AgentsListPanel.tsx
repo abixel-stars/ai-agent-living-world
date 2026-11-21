@@ -29,7 +29,7 @@ export default function AgentsListPanel() {
       <section>
         <h2 className="text-lg font-bold leading-tight">Agents (demo)</h2>
         <p className="mt-1 text-sm text-inksoft">
-          10 agent dan pemilik {OWNER.displayName}.
+          13 agent dan pemilik {OWNER.displayName}.
         </p>
       </section>
 

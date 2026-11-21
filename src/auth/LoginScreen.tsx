@@ -14,7 +14,7 @@ const BULLETS = [
   },
   {
     icon: Bot,
-    text: '10 agent dan pemilik yang bergerak mengikuti jadwal visual harian.',
+    text: '13 agent dan pemilik yang bergerak mengikuti jadwal visual harian.',
   },
   {
     icon: Check,

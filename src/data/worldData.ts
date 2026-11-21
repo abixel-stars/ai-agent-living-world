@@ -1,6 +1,6 @@
 import type { AgentDef, NavKey, OwnerDef, ScheduleBlock } from '../types'
 
-/** The 10 AI agent avatars. Provider/model fields are deliberately absent:
+/** The 13 AI agent avatars. Provider/model fields are deliberately absent:
  *  no provider is connected in Phase 1, and the UI must say so honestly. */
 export const AGENTS: AgentDef[] = [
   { id: 'kirana', name: 'Kirana', role: 'Manager Agent', team: 'Manajemen', personality: 'Tenang, rapi, menjaga ritme tim.', demoTask: 'Tugas demo: menyusun agenda tim', color: '#2F7D6B', outfit: 'jacket', hair: 'bun', skin: '#E8B98F', deskId: 'desk-1' },
@@ -13,9 +13,12 @@ export const AGENTS: AgentDef[] = [
   { id: 'fajar', name: 'Fajar', role: 'QA Agent', team: 'Kualitas', personality: 'Sistematis, tidak mudah puas.', demoTask: 'Tugas demo: memeriksa jalur klik avatar', color: '#C99A2E', outfit: 'sweater', hair: 'short', skin: '#C98A54', deskId: 'desk-8' },
   { id: 'lestari', name: 'Lestari', role: 'Finance Analyst Agent', team: 'Keuangan', personality: 'Hati hati, rapi soal anggaran.', demoTask: 'Tugas demo: menghitung biaya simulasi', color: '#4A6B8A', outfit: 'jacket', hair: 'bun', skin: '#E6B787', deskId: 'desk-9' },
   { id: 'gilang', name: 'Gilang', role: 'Administrative Agent', team: 'Operasional', personality: 'Ramah, sigap membantu.', demoTask: 'Tugas demo: menata jadwal ruangan', color: '#8A6B4A', outfit: 'shirt', hair: 'fade', skin: '#D89B62', deskId: 'desk-10' },
+  { id: 'bagas', name: 'Bagas', role: 'CEO Agent', team: 'Manajemen', personality: 'Tegas, visioner, menjaga arah perusahaan.', demoTask: 'Tugas demo: meninjau rencana perusahaan', color: '#8C3B3B', outfit: 'jacket', hair: 'short', skin: '#DDA276', deskId: 'desk-11' },
+  { id: 'tania', name: 'Tania', role: 'Graphic Design Agent', team: 'Desain', personality: 'Kreatif, berani warna, teliti komposisi.', demoTask: 'Tugas demo: merancang grafis kampanye', color: '#7B5EA7', outfit: 'jacket', hair: 'long', skin: '#F0C49C', deskId: 'desk-16' },
+  { id: 'yoga', name: 'Yoga', role: 'SEO Agent', team: 'Pemasaran', personality: 'Analitis, suka eksperimen kata kunci.', demoTask: 'Tugas demo: memeriksa kata kunci', color: '#3A9AB8', outfit: 'sweater', hair: 'short', skin: '#C98F5F', deskId: 'desk-24' },
 ]
 
-/** Abi, the human owner of the campus. Eleventh character, not an AI agent. */
+/** Abi, the human owner of the office. Fourteenth character, not an AI agent. */
 export const OWNER: OwnerDef = {
   id: 'owner',
   name: 'Abi',
@@ -121,6 +124,33 @@ export const SCHEDULES: Record<string, ScheduleBlock[]> = {
     { start: 290, activity: 'sitting', location: 'desk', label: 'Menata jadwal' },
     { start: 600, activity: 'walking', location: 'entrance', label: 'Pulang' },
   ],
+  bagas: [
+    { start: 0, activity: 'walking', location: 'entrance', label: 'Tiba di kantor pusat' },
+    { start: 30, activity: 'sitting', location: 'desk', label: 'Bekerja di ruang CEO' },
+    { start: 140, activity: 'meeting', location: 'meeting', label: 'Rapat tim' },
+    { start: 210, activity: 'thinking', location: 'desk', label: 'Meninjau rencana' },
+    { start: 330, activity: 'talking', location: 'lobby', label: 'Menyapa di lobi' },
+    { start: 390, activity: 'sitting', location: 'desk', label: 'Bekerja di ruang CEO' },
+    { start: 615, activity: 'walking', location: 'entrance', label: 'Pulang' },
+  ],
+  tania: [
+    { start: 0, activity: 'walking', location: 'entrance', label: 'Tiba di kantor pusat' },
+    { start: 35, activity: 'typing', location: 'desk', label: 'Mendesain grafis' },
+    { start: 140, activity: 'meeting', location: 'meeting', label: 'Rapat tim' },
+    { start: 210, activity: 'thinking', location: 'desk', label: 'Mencari komposisi' },
+    { start: 320, activity: 'break', location: 'plaza', label: 'Istirahat di plaza' },
+    { start: 370, activity: 'typing', location: 'desk', label: 'Mendesain grafis' },
+    { start: 610, activity: 'walking', location: 'entrance', label: 'Pulang' },
+  ],
+  yoga: [
+    { start: 0, activity: 'walking', location: 'entrance', label: 'Tiba di kantor pusat' },
+    { start: 30, activity: 'typing', location: 'desk', label: 'Memeriksa kata kunci' },
+    { start: 150, activity: 'meeting', location: 'meeting', label: 'Rapat tim' },
+    { start: 220, activity: 'thinking', location: 'desk', label: 'Menganalisis trafik' },
+    { start: 330, activity: 'break', location: 'garden', label: 'Jalan di taman' },
+    { start: 380, activity: 'typing', location: 'desk', label: 'Memeriksa kata kunci' },
+    { start: 605, activity: 'walking', location: 'entrance', label: 'Pulang' },
+  ],
   owner: [
     { start: 0, activity: 'walking', location: 'entrance', label: 'Tiba di kantor pusat' },
     { start: 30, activity: 'thinking', location: 'ceoDesk', label: 'Meninjau kantor pusat' },
@@ -142,7 +172,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { key: 'world', label: 'World', phase: 1, note: 'Dunia 3D kantor pusat' },
-  { key: 'agents', label: 'Agents', phase: 1, note: '10 agent dan pemilik' },
+  { key: 'agents', label: 'Agents', phase: 1, note: '13 agent dan pemilik' },
   { key: 'tasks', label: 'Tasks', phase: 3, note: 'Orkestrasi tugas dan eksekusi AI' },
   { key: 'teams', label: 'Teams', phase: 3, note: 'Tim dan departemen' },
   { key: 'meetings', label: 'Meetings', phase: 4, note: 'Rapat antar agent' },

@@ -115,7 +115,7 @@ export function InteriorFloor(): React.ReactElement | null {
       </group>
 
       <group>
-        {DESKS.map((desk) => (
+        {DESKS.filter((desk) => desk.floor === 1).map((desk) => (
           <Desk key={desk.id} desk={desk} />
         ))}
       </group>

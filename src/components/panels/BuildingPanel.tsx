@@ -1,16 +1,24 @@
 import { Eye, EyeOff } from 'lucide-react'
 import { WORLD_NAME } from '../../data/worldData'
 import { useAppStore } from '../../state/useAppStore'
+import { ROOM_PLANS } from '../../world/layout'
 
 const FLOORS = [1, 2, 3, 4, 5]
 
-const ROOMS = [
+const GROUND_ROOMS = [
   { name: 'Lobi', detail: 'Lantai 1' },
   { name: 'Area resepsionis', detail: 'Lantai 1' },
   { name: 'Ruang CEO', detail: 'Lantai 1' },
   { name: 'Workspace terbuka', detail: 'Lantai 1' },
   { name: 'Ruang meeting', detail: 'Lantai 1' },
   { name: 'Rooftop lounge', detail: 'Atap' },
+]
+
+const ROOMS = [
+  ...GROUND_ROOMS,
+  ...[2, 3, 4, 5].flatMap((floor) =>
+    ROOM_PLANS[floor].map((room) => ({ name: room.name, detail: `Lantai ${floor}` })),
+  ),
 ]
 
 export default function BuildingPanel() {
@@ -50,7 +58,7 @@ export default function BuildingPanel() {
         <p className="mt-3 text-sm leading-relaxed">
           {floor === 1
             ? 'Lantai 1: lobi, ruang CEO, workspace, ruang meeting (detail)'
-            : `Lantai ${floor}: Interior Fase 2`}
+            : `Lantai ${floor}: ${ROOM_PLANS[floor].map((room) => room.name).join(', ')}`}
         </p>
       </section>
 
@@ -82,7 +90,7 @@ export default function BuildingPanel() {
           ))}
         </ul>
         <p className="mt-3 text-[13px] leading-relaxed text-inksoft">
-          Gedung lain dan area rekreasi hadir di Fase 2.
+          Gedung pendukung, area rekreasi, dan apartemen hadir di fase berikutnya.
         </p>
       </section>
     </div>

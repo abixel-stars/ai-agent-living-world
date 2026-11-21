@@ -1,7 +1,7 @@
 import { AGENTS, OWNER } from '../data/worldData'
 import { AgentAvatar } from './AgentAvatar'
 
-/** All 11 characters: the 10 agents plus the owner. No other logic. */
+/** All 14 characters: the 13 agents plus the owner. No other logic. */
 export function AgentLayer() {
   return (
     <group>

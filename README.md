@@ -1,10 +1,11 @@
 # Agent Automation Corp, Living World 3D
 
-Dunia 3D kantor pusat Agent Automation Corp: 10 AI agent dan pemiliknya,
+Dunia 3D kantor pusat Agent Automation Corp: 13 AI agent dan pemiliknya,
 Abi (Owner), bergerak mengikuti jadwal visual harian di dalam satu gedung
-kantor 5 lantai dengan satu lantai interior yang detail. Ini adalah
-**Fase 1** dari spesifikasi MASTER_PROMPT (7 fase). Semua yang berjalan di
-sini adalah **simulasi visual**. Tidak ada pekerjaan AI nyata, tidak ada
+kantor 5 lantai dengan interior detail di semua lantai. Ini adalah
+**Fase 1** dari spesifikasi MASTER_PROMPT (7 fase), ditambah interior
+lantai 2-5 dan 3 karakter tambahan pada **Fase 1.5**. Semua yang berjalan
+di sini adalah **simulasi visual**. Tidak ada pekerjaan AI nyata, tidak ada
 backend, tidak ada provider model yang terhubung.
 
 ## Menjalankan
@@ -43,17 +44,25 @@ atau ditebak di repo ini.
 
 - Dunia 3D: lahan kantor pusat, jalan, taman, plaza dan air mancur,
   parkir dengan mobil dekoratif, pepohonan, lampu jalan, dan gedung
-  kantor pusat 5 lantai. Lantai 1 interior detail: lobi dan resepsionis,
-  ruang CEO, workspace terbuka (10 meja, komputer, kursi), satu ruang
-  meeting, tanaman, lampu, dan dekorasi. Rooftop lounge di atap.
+  kantor pusat 5 lantai. Interior detail di semua lantai: lantai 1
+  (lobi dan resepsionis, ruang CEO, workspace terbuka, satu ruang
+  meeting), lantai 2 (ruang programmer, ruang UI/UX dan desain, studio
+  content creator, focus pods), lantai 3 (ruang research dan data,
+  ruang marketing, ruang meeting kecil, ruang HR dan administrasi),
+  lantai 4 (ruang project manager, ruang meeting besar, perpustakaan
+  dan focus, ruang meeting 2), lantai 5 (command center, ruang server,
+  balcony lounge dengan dek balkon). Lift, tangga, koridor, dan toilet
+  dekoratif di tiap lantai atas. Rooftop lounge di atap.
 - Kamera: tampilan isometrik 3/4 bawaan, orbit bebas (drag), zoom
   (wheel), mode Atas, mode Fokus gedung, dan Follow untuk mengikuti
   satu karakter. Klik gedung membuka panel gedung. Tombol sembunyikan
-  atap dan pemilih lantai (lantai 2-5 menampilkan hanya selubung lantai
-  itu, interiornya hadir di Fase 2).
-- 11 karakter geometri prosedural (bukan gambar 2D, tanpa unduhan model
-  eksternal): 10 AI agent dengan tampilan berbeda-beda, ditambah
-  **Abi (Owner)**, karakter ke-11 yang berbeda secara visual (aksen
+  atap dan pemilih lantai (memilih satu lantai menampilkan hanya
+  interior lantai itu; tombol sembunyikan atap juga membuka plafon
+  lantai terpilih untuk tampilan dollhouse). Karakter naik lift antar
+  lantai mengikuti jadwalnya.
+- 14 karakter geometri prosedural (bukan gambar 2D, tanpa unduhan model
+  eksternal): 13 AI agent dengan tampilan berbeda-beda, ditambah
+  **Abi (Owner)**, karakter ke-14 yang berbeda secara visual (aksen
   krem dan oranye, pin emas, label dan badge OWNER) dan bukan AI agent.
   Panel Abi menampilkan jadwalnya, kontrol Follow, fokus ruang CEO, dan
   **Gerakkan Abi**: saat aktif, klik lantai atau plaza untuk
@@ -97,10 +106,11 @@ saja.
 
 ## Backlog (Fase 2-7, belum dibangun)
 
-Fase 2: interior lantai 2-5, gedung pendukung, area rekreasi dan
-apartemen agent, mode bangun. Fase 3: orkestrasi backend dan eksekusi
-tugas AI nyata, integrasi provider model, chat dan pemberian tugas.
-Fase 4: meeting multi-agent dan kolaborasi. Fase 5: database Supabase,
-auth penuh, RLS, dan persistensi world. Fase 6: build mode lanjutan dan
-analitik. Fase 7: polish, performa skala besar, dan rilis. Detail status
-pengujian jujur ada di `TEST_REPORT.md`.
+Fase 2: gedung pendukung, area rekreasi dan apartemen agent, mode
+bangun. (Interior lantai 2-5 sudah dibangun pada Fase 1.5.) Fase 3:
+orkestrasi backend dan eksekusi tugas AI nyata, integrasi provider
+model, chat dan pemberian tugas. Fase 4: meeting multi-agent dan
+kolaborasi. Fase 5: database Supabase, auth penuh, RLS, dan persistensi
+world. Fase 6: build mode lanjutan dan analitik. Fase 7: polish,
+performa skala besar, dan rilis. Detail status pengujian jujur ada di
+`TEST_REPORT.md`.

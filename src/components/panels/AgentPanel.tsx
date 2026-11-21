@@ -1,5 +1,6 @@
 import { MessageSquare, Pause, Play, UserCheck, UserX } from 'lucide-react'
 import { AGENTS } from '../../data/worldData'
+import { DESKS } from '../../world/layout'
 import { useAppStore } from '../../state/useAppStore'
 import { useSimSnapshot } from '../../simulation/engine'
 import type { ActivityKind } from '../../types'
@@ -48,7 +49,8 @@ export default function AgentPanel({ id }: { id: string }) {
   }
 
   function handleWorkspace() {
-    setFloor(1)
+    const desk = DESKS.find((d) => d.id === def?.deskId)
+    setFloor(desk?.floor ?? 1)
     setFollowId(null)
     setCameraMode('focus')
   }

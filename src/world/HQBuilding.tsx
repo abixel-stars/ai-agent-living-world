@@ -41,7 +41,15 @@ function Mullions({ baseY, visible }: { baseY: number; visible: boolean }): Reac
   return <primitive object={mesh} />
 }
 
-function UpperFloor({ index, visible }: { index: number; visible: boolean }): React.ReactElement | null {
+function UpperFloor({
+  index,
+  visible,
+  hideCeiling,
+}: {
+  index: number
+  visible: boolean
+  hideCeiling: boolean
+}): React.ReactElement | null {
   const baseY = GROUND_TOP + (index - 2) * FLOOR_HEIGHT
   if (!visible) return null
   return (
@@ -51,7 +59,9 @@ function UpperFloor({ index, visible }: { index: number; visible: boolean }): Re
       <mesh geometry={unitBox} material={getMaterial('glass')} position={[0, baseY + FLOOR_HEIGHT / 2, 10]} scale={[WIDTH, FLOOR_HEIGHT, 0.08]} />
       <mesh geometry={unitBox} material={getMaterial('glass')} position={[-15, baseY + FLOOR_HEIGHT / 2, 0]} scale={[0.08, FLOOR_HEIGHT, DEPTH]} />
       <mesh geometry={unitBox} material={getMaterial('glass')} position={[15, baseY + FLOOR_HEIGHT / 2, 0]} scale={[0.08, FLOOR_HEIGHT, DEPTH]} />
-      <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, baseY + FLOOR_HEIGHT - 0.18, 0]} scale={[WIDTH + 0.6, 0.36, DEPTH + 0.6]} />
+      {!hideCeiling && (
+        <mesh geometry={unitBox} material={getMaterial('creamWall')} position={[0, baseY + FLOOR_HEIGHT - 0.18, 0]} scale={[WIDTH + 0.6, 0.36, DEPTH + 0.6]} />
+      )}
       <Mullions baseY={baseY} visible />
     </group>
   )
@@ -135,7 +145,7 @@ export function HQBuilding(): React.ReactElement {
     <group onClick={handleClick}>
       {showGroundShell && <GroundShell />}
       {[2, 3, 4, 5].map((index) => (
-        <UpperFloor key={index} index={index} visible={showUpper(index)} />
+        <UpperFloor key={index} index={index} visible={showUpper(index)} hideCeiling={floor === index && roofHidden} />
       ))}
       {showRoof && (
         <group>

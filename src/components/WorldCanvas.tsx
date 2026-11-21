@@ -9,6 +9,7 @@ import { SimulationDriver } from '../simulation/SimulationDriver'
 import { Campus } from '../world/Campus'
 import { HQBuilding } from '../world/HQBuilding'
 import { InteriorFloor } from '../world/InteriorFloor'
+import { UpperFloors } from '../world/UpperFloors'
 import { CameraRig } from '../world/CameraRig'
 import { Lighting } from '../world/Lighting'
 
@@ -60,6 +61,7 @@ export function WorldCanvas({ onCreated }: WorldCanvasProps): React.ReactElement
         <Campus />
         <HQBuilding />
         <InteriorFloor />
+        <UpperFloors />
         <AgentLayer />
         <SimulationDriver />
         <GroundClickPlane />

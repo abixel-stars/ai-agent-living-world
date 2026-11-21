@@ -5,6 +5,7 @@ import { MathUtils, type Group } from 'three'
 import { simEngine, useSimSnapshot } from '../simulation/engine'
 import { useAppStore } from '../state/useAppStore'
 import { OWNER } from '../data/worldData'
+import { floorOfY } from '../world/layout'
 import type { AgentDef, OwnerDef } from '../types'
 import { AvatarModel, type AvatarParts } from './AvatarModel'
 
@@ -86,6 +87,12 @@ export function AgentAvatar({ def, isOwner }: AgentAvatarProps) {
   const snapshots = useSimSnapshot()
   const snapshot = snapshots.find((s) => s.id === def.id)
   const inLift = snapshot?.activity === 'inLift'
+
+  // Floor isolation: floor 1 shows the whole building; any other selected
+  // floor shows only the characters standing on that floor.
+  const selectedFloor = useAppStore((s) => s.floor)
+  const charFloor = snapshot ? floorOfY(snapshot.position[1]) : 1
+  const onThisFloor = selectedFloor === 1 || charFloor === selectedFloor
 
   const displayName = isOwner ? OWNER.displayName : def.name
 
@@ -230,6 +237,8 @@ export function AgentAvatar({ def, isOwner }: AgentAvatarProps) {
     e.stopPropagation()
     useAppStore.getState().select(isOwner ? { kind: 'owner' } : { kind: 'agent', id: def.id })
   }
+
+  if (!onThisFloor) return null
 
   return (
     <group ref={groupRef}>

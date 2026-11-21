@@ -6,6 +6,8 @@ import {
   collides,
   deskChair,
   findPath,
+  floorOfY,
+  liftNodeForFloor,
   meetingChairSpot,
   nearestWaypoint,
   resolveLocation,
@@ -43,6 +45,8 @@ export type RuntimeState = {
   customTarget: { x: number; z: number } | null
   /** Waypoint ids still to walk after a lift transit. Null when no lift is pending. */
   liftPending: string[] | null
+  /** Lift waypoint id where the current transit ends. Null when not in a lift. */
+  liftExit: string | null
 }
 
 interface CharInfo {
@@ -115,6 +119,7 @@ export class SimEngine {
         meetingChair: info.meetingChair,
         customTarget: null,
         liftPending: null,
+        liftExit: null,
       }
       this.runtime.set(info.id, rt)
       // Silent first assignment: no ticker event for the spawn state.
@@ -156,18 +161,19 @@ export class SimEngine {
   private computeRoute(
     rt: RuntimeState,
     targetNodeId: string,
-  ): { path: string[]; liftPending: string[] | null } {
+  ): { path: string[]; liftPending: string[] | null; liftExit: string | null } {
     const fromId = nearestWaypoint(rt.pos[0], rt.pos[2], rt.pos[1])
     const from = waypoint(fromId)
     const target = waypoint(targetNodeId)
-    if (Math.abs(from.y - target.y) <= 0.5) {
-      return { path: findPath(fromId, targetNodeId), liftPending: null }
+    if (floorOfY(from.y) === floorOfY(target.y)) {
+      return { path: findPath(fromId, targetNodeId), liftPending: null, liftExit: null }
     }
-    const liftEntry = from.y > 1 ? 'liftRoof' : 'liftLobby'
-    const liftExit = from.y > 1 ? 'liftLobby' : 'liftRoof'
+    const liftEntry = liftNodeForFloor(floorOfY(from.y))
+    const liftExit = liftNodeForFloor(floorOfY(target.y))
     return {
       path: findPath(fromId, liftEntry),
       liftPending: findPath(liftExit, targetNodeId).slice(1),
+      liftExit,
     }
   }
 
@@ -190,6 +196,7 @@ export class SimEngine {
     rt.path = route.path
     rt.pathIdx = 0
     rt.liftPending = route.liftPending
+    rt.liftExit = route.liftExit
     this.setActivity(rt, 'walking', emit)
   }
 
@@ -215,11 +222,11 @@ export class SimEngine {
   }
 
   private completeLift(rt: RuntimeState, info: CharInfo): void {
-    const exitId = rt.pos[1] > 1 ? 'liftLobby' : 'liftRoof'
-    const exit = waypoint(exitId)
+    const exit = waypoint(rt.liftExit ?? liftNodeForFloor(floorOfY(rt.pos[1])))
     rt.pos = [exit.x, exit.y, exit.z]
     rt.hidden = false
     rt.liftTimer = 0
+    rt.liftExit = null
     const pending = rt.liftPending
     rt.liftPending = null
     rt.path = pending ?? []
@@ -396,11 +403,12 @@ export class SimEngine {
     const target = waypoint(toId)
     let path: string[]
     let liftPending: string[] | null = null
-    if (Math.abs(from.y - target.y) <= 0.5) {
+    let liftExit: string | null = null
+    if (floorOfY(from.y) === floorOfY(target.y)) {
       path = findPath(fromId, toId)
     } else {
-      const liftEntry = from.y > 1 ? 'liftRoof' : 'liftLobby'
-      const liftExit = from.y > 1 ? 'liftLobby' : 'liftRoof'
+      const liftEntry = liftNodeForFloor(floorOfY(from.y))
+      liftExit = liftNodeForFloor(floorOfY(target.y))
       path = findPath(fromId, liftEntry)
       liftPending = findPath(liftExit, toId).slice(1)
     }
@@ -408,6 +416,7 @@ export class SimEngine {
     rt.path = path
     rt.pathIdx = 0
     rt.liftPending = liftPending
+    rt.liftExit = liftExit
     rt.pose = 'stand'
     rt.chair = null
     this.setActivity(rt, 'walking', true)

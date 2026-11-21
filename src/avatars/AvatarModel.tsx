@@ -43,7 +43,7 @@ const stripeGeometry = new BoxGeometry(0.46, 0.07, 0.02)
 const pinGeometry = new SphereGeometry(0.032, 10, 8)
 const sleeveGeometry = new BoxGeometry(0.18, 0.12, 0.18)
 
-// Materials cached per color so 11 characters share a small set.
+// Materials cached per color so 14 characters share a small set.
 const materialCache = new Map<string, MeshStandardMaterial>()
 const dimMaterialCache = new Map<string, MeshStandardMaterial>()
 

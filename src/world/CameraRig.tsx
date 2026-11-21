@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useAppStore } from '../state/useAppStore'
+import { FLOOR_BASE_Y } from '../world/layout'
 import { useSimSnapshot } from '../simulation/engine'
 import type { Vec3Tuple } from '../types'
 
@@ -64,8 +65,9 @@ export function CameraRig(): React.ReactElement {
       anim.position.copy(DEFAULT_POSITION)
       anim.target.copy(DEFAULT_TARGET)
       if (floor > 1) {
-        anim.position.y += (floor - 1) * 2
-        anim.target.y += (floor - 1) * 3.4
+        const baseY = FLOOR_BASE_Y[floor] ?? 0
+        anim.position.y += baseY
+        anim.target.y = baseY + 1
       }
     }
     anim.active = true
