@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', ui-sans-system, system-ui, sans-serif;
+  background: #faf7f1;
+  color: #2e2a25;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Light glassmorphism panel, as fixed by the spec (sections 1 and 13). */
+.panel-glass {
+  background: rgba(255, 253, 250, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(231, 223, 210, 0.9);
+}
+
+.panel-solid {
+  background: #fffdfa;
+  border: 1px solid #e7dfd2;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: #ddd2bf;
+  border-radius: 999px;
+}
+
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid #4e7fa6;
+  outline-offset: 2px;
+}

@@ -1,0 +1,17 @@
+# Progress-watch snapshot — Agent Automation Corp FASE 1 build
+# Created on first watch run; update only when reporting a meaningful change.
+snapshot_at: 2026-11-21 16:55:52 WIB (Asia/Jakarta)
+src_file_count: 35
+newest_src_file: src/simulation/SimulationDriver.tsx (2026-11-21 16:55:30 WIB)
+test_report_md: absent
+readme_md: absent
+dist_present: yes
+dist_mtime: 2026-11-21 16:56:01 WIB
+dist_index_html: present (489 bytes)
+dist_js: assets/index-DQf23upn.js
+dist_css: assets/index-Zo-fPn84.css
+coordinator_id: 78c594dd-9581-4f96-a6ae-6d81a5427b12
+coordinator_status: running
+coordinator_last_activity_age_seconds: 2
+coordinator_running_for_seconds: 1006
+builders_done: A (8f642fd8), B (5d0eda45), C (966a3269) — all completed (naming: Agent Automation Corp)
